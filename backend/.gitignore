@@ -1,0 +1,63 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn.lock
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+server.log
+
+# MySQL database files (if applicable)
+*.sql
+
+# Build files
+dist/
+build/
+.tmp/
+
+# IDE and Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Docker files (if using Docker)
+docker-compose.override.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+
+# PM2 process manager logs (if using PM2)
+pm2.log
+pm2.pid
+pids/
+pids/*
+
+# Sequelize migrations and seeders (if applicable)
+migrations/
+seeders/
+
+# Security
+.git-credentials
