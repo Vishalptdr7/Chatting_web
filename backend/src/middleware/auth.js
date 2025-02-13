@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import {User} from "../models/user.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const verifyJWT = asyncHandler(async (req, res, next) => {
@@ -26,4 +26,4 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
   }
 });
 
-export {verifyJWT};
+export { verifyJWT };

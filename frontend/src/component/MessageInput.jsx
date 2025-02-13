@@ -11,14 +11,15 @@ const MessageInput = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
+      toast.error("Please select an image file");
       return;
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -32,78 +33,71 @@ const MessageInput = () => {
     if (!text.trim() && !imagePreview) return;
 
     try {
-      await sendMessage({ text: text.trim(), image: imagePreview });
+      await sendMessage({
+        text: text.trim(),
+        image: imagePreview,
+      });
 
-      // Clear input fields after sending
+      // Clear form
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
-      toast.error("Failed to send message. Please try again.");
-      console.error("Message send error:", error);
+      console.error("Failed to send message:", error);
     }
   };
 
   return (
-    <div className="p-4 border-t bg-white shadow-md">
-      {/* Image Preview */}
+    <div className="p-4 w-full">
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
-          <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300">
+          <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-2 -right-2 bg-gray-800 text-white p-1 rounded-full hover:bg-red-500 transition"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
+              flex items-center justify-center"
               type="button"
             >
-              <X size={16} />
+              <X className="size-3" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Message Input */}
-      <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-        {/* Text Input */}
-        <input
-          type="text"
-          className="w-full input input-bordered rounded-lg p-2"
-          placeholder="Type a message..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSendMessage(e)}
-        />
+      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+        <div className="flex-1 flex gap-2">
+          <input
+            type="text"
+            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
+            placeholder="Type a message..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+          />
 
-        {/* File Input (Hidden) */}
-        <input
-          type="file"
-          accept="image/*"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleImageChange}
-        />
-
-        {/* Attach Image Button */}
-        <button
-          type="button"
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Image size={22} className="text-gray-600" />
-        </button>
-
-        {/* Send Button */}
+          <button
+            type="button"
+            className={`hidden sm:flex btn btn-circle
+                  ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Image size={20} />
+          </button>
+        </div>
         <button
           type="submit"
-          className={`p-2 rounded-full ${
-            text.trim() || imagePreview
-              ? "bg-blue-500 text-white"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          className="btn btn-sm btn-circle"
           disabled={!text.trim() && !imagePreview}
         >
           <Send size={22} />
@@ -112,5 +106,4 @@ const MessageInput = () => {
     </div>
   );
 };
-
 export default MessageInput;

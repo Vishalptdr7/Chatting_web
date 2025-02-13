@@ -1,32 +1,24 @@
-import { lazy, Suspense, useMemo } from "react";
 import { useChatStore } from "../store/useChatStore";
 
-// Lazy load components to optimize performance
-const Sidebar = lazy(() => import("../component/Sidebar"));
-const NoChatSelected = lazy(() => import("../component/NoChatSelected"));
-const ChatContainer = lazy(() => import("../component/ChatContainer"));
+import Sidebar from "../component/Sidebar";
+import NoChatSelected from "../component/NoChatSelected";
+import ChatContainer from "../component/ChatContainer";
 
 const HomePage = () => {
   const { selectedUser } = useChatStore();
 
-  // Memoize selectedUser to prevent unnecessary re-renders
-  const chatComponent = useMemo(() => {
-    return selectedUser ? <ChatContainer /> : <NoChatSelected />;
-  }, [selectedUser]);
-
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="bg-base-100 rounded-lg shadow-lg w-full max-w-6xl h-[calc(100vh-8rem)]">
-        <div className="flex h-full rounded-lg overflow-hidden">
-          {/* Use Suspense for lazy-loaded components */}
-          <Suspense fallback={<div>Loading...</div>}>
+    <div className="h-screen bg-base-200">
+      <div className="flex items-center justify-center pt-20 px-4">
+        <div className="bg-base-100 rounded-lg shadow-cl w-full max-w-6xl h-[calc(100vh-8rem)]">
+          <div className="flex h-full rounded-lg overflow-hidden">
             <Sidebar />
-            {chatComponent}
-          </Suspense>
+
+            {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
 export default HomePage;

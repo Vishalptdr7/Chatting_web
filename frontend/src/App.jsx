@@ -18,17 +18,13 @@ const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
 
-  
-
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
-    console.log("Current Online Users:", onlineUsers);
   }, [onlineUsers]);
-  console.log({ onlineUsers });
-  console.log({ authUser });
+
 
   if (isCheckingAuth && !authUser)
     return (

@@ -1,143 +1,111 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../component/AuthImagePattern";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const { login, isLoggingIn } = useAuthStore();
-
-  // Optimize event handler using useCallback
-  const handleSubmit = useCallback(
-    (e) => {
-      e.preventDefault();
-      login(formData);
-    },
-    [formData, login]
-  );
-
-  // Memoize the button content to prevent unnecessary re-renders
-  const loginButtonContent = useMemo(
-    () =>
-      isLoggingIn ? (
-        <>
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading...
-        </>
-      ) : (
-        "Sign in"
-      ),
-    [isLoggingIn]
-  );
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const { login, isLoggingIn, authUser } = useAuthStore();
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    login(formData);
+    if (authUser) {
+      navigate("/");
+    }
+  };
 
   return (
-    <div className="h-screen grid lg:grid-cols-2">
-      {/* Left Side - Form */}
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo & Welcome Message */}
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <MessageSquare className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Sign in to your account</p>
-            </div>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-base-content/40" />
+    <div className="h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white flex items-center justify-center p-6">
+      <div className="bg-gray-950 rounded-2xl shadow-lg w-full max-w-4xl h-[calc(100vh-6rem)] overflow-hidden flex border border-gray-700">
+        {/* Left Side - Form */}
+        <div className="flex flex-col justify-center items-center p-8 w-1/2">
+          <div className="w-full space-y-6">
+            {/* Logo */}
+            <div className="text-center">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center transition-all">
+                  <MessageSquare className="w-6 h-6 text-primary" />
                 </div>
+                <h1 className="text-2xl font-bold">Welcome Back</h1>
+                <p className="text-gray-400">Sign in to your account</p>
+              </div>
+            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   type="email"
-                  className="input input-bordered w-full pl-10"
+                  className="input input-bordered w-full pl-10 bg-gray-800 text-white border-gray-700 focus:border-primary"
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                    setFormData({ ...formData, email: e.target.value })
                   }
-                  aria-label="Email"
                 />
               </div>
-            </div>
-
-            {/* Password Input */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-base-content/40" />
-                </div>
+                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="input input-bordered w-full pl-10"
+                  className="input input-bordered w-full pl-10 bg-gray-800 text-white border-gray-700 focus:border-primary"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }))
+                    setFormData({ ...formData, password: e.target.value })
                   }
-                  aria-label="Password"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-3"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                    <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
-                    <Eye className="h-5 w-5 text-base-content/40" />
+                    <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
+              <button
+                type="submit"
+                className="btn btn-primary w-full flex justify-center items-center gap-2"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </form>
+            <div className="text-center text-gray-400">
+              <p>
+                Don&apos;t have an account?{" "}
+                <Link to="/signup" className="text-primary">
+                  Create account
+                </Link>
+              </p>
             </div>
-
-            {/* Sign In Button */}
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={isLoggingIn}
-            >
-              {loginButtonContent}
-            </button>
-          </form>
-
-          {/* Signup Link */}
-          <div className="text-center">
-            <p className="text-base-content/60">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="link link-primary">
-                Create account
-              </Link>
-            </p>
           </div>
         </div>
+        {/* Right Side - Image/Pattern */}
+        <div className="hidden lg:flex w-1/2 bg-gray-800 items-center justify-center p-6">
+          <AuthImagePattern
+            title={"Welcome back!"}
+            subtitle={
+              "Sign in to continue your conversations and catch up with your messages."
+            }
+          />
+        </div>
       </div>
-
-      {/* Right Side - Image/Pattern */}
-      <AuthImagePattern
-        title="Welcome back!"
-        subtitle="Sign in to continue your conversations and catch up with your messages."
-      />
     </div>
   );
 };
-
 export default LoginPage;

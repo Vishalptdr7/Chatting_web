@@ -7,27 +7,30 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"], 
+    origin: ["http://localhost:5173"], // Adjust based on your frontend URL
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-const userSocketMap = new Map(); 
+const userSocketMap = new Map(); // Stores userId → socketId
 
 export function getReceiverSocketId(userId) {
-  return userSocketMap[userId] || null;
+  return userSocketMap.get(userId) || null;
 }
 
 io.on("connection", (socket) => {
-  const userId = socket.handshake.query.userId;
+
+ 
+  const userId = socket.handshake.auth?.userId;
 
   if (!userId || userId === "undefined") {
     console.log("❌ Invalid userId received:", userId);
+    socket.disconnect(true); // Force disconnect to avoid ghost sockets
     return;
   }
 
-  console.log("✅ A user connected:", socket.id, "with userId:", userId);
+  console.log("✅ User connected:", socket.id, "with userId:", userId);
 
   userSocketMap.set(userId, socket.id);
   console.log("🔵 Online Users:", [...userSocketMap.keys()]);
@@ -44,6 +47,5 @@ io.on("connection", (socket) => {
     }
   });
 });
-
 
 export { io, app, server };
