@@ -39,3 +39,7 @@ app.use("/api/user", router);
 import messageRouter from "./routes/messages.js";
 
 app.use("/api/messages", messageRouter);
+
+import groupRouter from "./routes/group.js";
+
+app.use("/api/group", groupRouter);
