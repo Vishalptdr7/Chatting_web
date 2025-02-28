@@ -3,7 +3,7 @@ import {
   createGroup,
   addMembers,
   removeMember,
-  sendMessage,
+  sendGroupMessage,
   getMessages,
   deleteGroup,
   getGroup,
@@ -16,11 +16,11 @@ groupRouter.route("/").post(verifyJWT, createGroup);
 
 groupRouter.route("/addMembers").post(verifyJWT, addMembers);
 
-groupRouter.route("/:groupId").get(verifyJWT,getGroup);
+groupRouter.route("/").get(verifyJWT,getGroup);
 
 groupRouter.route("/removeMember").post(verifyJWT, removeMember);
 
-groupRouter.route("/sendMessage").post(verifyJWT, sendMessage);
+groupRouter.route("/sendMessage/:groupId").post(verifyJWT, sendGroupMessage);
 
 groupRouter.route("/:groupId/messages").get(verifyJWT, getMessages);
 

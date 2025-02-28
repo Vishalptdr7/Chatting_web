@@ -9,28 +9,31 @@ const GroupChatSchema = new Schema(
     },
     members: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     admins: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "User",
       },
     ],
     messages: [
       {
         sender: {
-          type: mongoose.Schema.Types.ObjectId,
+          type: Schema.Types.ObjectId,
           ref: "User",
         },
         message: {
           type: String,
         },
+        image: {
+          type: String,
+        },
         readBy: [
           {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "User",
           },
         ],
@@ -47,7 +50,6 @@ const GroupChatSchema = new Schema(
   },
   { timestamps: true }
 );
-
 
 const Group = mongoose.model("Group", GroupChatSchema);
 export default Group;

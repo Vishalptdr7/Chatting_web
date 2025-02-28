@@ -2,12 +2,14 @@ import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useGroupChatStore } from "../store/useGroupChat";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const { sendMessage, selectedUser } = useChatStore();
+  const { sendGroupMessage, selectedGroup } = useGroupChatStore();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -34,10 +36,22 @@ const MessageInput = () => {
     if (!text.trim() && !imagePreview) return;
 
     try {
-      await sendMessage({
+      const messageData = {
         text: text.trim(),
         image: imagePreview,
-      });
+      };
+
+      if (selectedGroup) {
+        
+        // Group Chat Message
+        await sendGroupMessage(messageData);
+      } else if (selectedUser) {
+        // Private Chat Message
+        await sendMessage(messageData);
+      } else {
+        toast.error("No chat selected");
+        return;
+      }
 
       // Clear form
       setText("");
@@ -45,6 +59,7 @@ const MessageInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+      toast.error("Failed to send message");
     }
   };
 
@@ -89,8 +104,9 @@ const MessageInput = () => {
 
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
-                  ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            className={`hidden sm:flex btn btn-circle ${
+              imagePreview ? "text-emerald-500" : "text-zinc-400"
+            }`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -107,4 +123,5 @@ const MessageInput = () => {
     </div>
   );
 };
+
 export default MessageInput;

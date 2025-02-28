@@ -21,20 +21,21 @@ export const useGroupChatStore = create((set, get) => ({
     }
   },
 
-  getGroup: async (groupId) => {
+  getGroup: async () => {
     set({ isGroupsLoading: true });
     try {
-      const res = await axiosInstance.get(`/group/${groupId}`);
-      set({ groups: res.data.group });
+      const res = await axiosInstance.get(`/group`); // Removed groupIds as the API doesn't require params
+      set({ groups: res.data.groups }); // Corrected to 'groups' as per the API response
       toast.success(res.data.message);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to fetch group");
+      toast.error(error.response?.data?.message || "Failed to fetch groups");
     } finally {
       set({ isGroupsLoading: false });
     }
   },
 
   getGroupMessages: async (groupId) => {
+    console.log("getGroupMessage");
     set({ isGroupMessagesLoading: true });
     try {
       const res = await axiosInstance.get(`/group/${groupId}/messages`);
@@ -47,9 +48,16 @@ export const useGroupChatStore = create((set, get) => ({
   },
 
   sendGroupMessage: async (messageData) => {
-    const { groupMessages } = get();
+    // ✅ Yeh sahi hai bhai
+    const { groupMessages, selectedGroup } = get();
+     const text=messageData?.text;
+     const image=messageData?.image;
     try {
-      const res = await axiosInstance.post("/group/sendMessage", messageData);
+      const res = await axiosInstance.post(
+        `/group/sendMessage/${selectedGroup._id}`,
+        {text,image}
+      );
+
       set({
         groupMessages: [...groupMessages, res.data.group.messages.at(-1)],
       });
@@ -60,18 +68,28 @@ export const useGroupChatStore = create((set, get) => ({
 
   subscribeToGroupMessages: () => {
     const { selectedGroup } = get();
+    console.log("subscribedGroup");
     if (!selectedGroup) return;
 
     const socket = useAuthStore.getState().socket;
+
+    // Always remove previous listener before adding a new one
+    socket.off("receiveGroupMessage");
+
     socket.emit("joinGroup", selectedGroup._id);
 
     socket.on("receiveGroupMessage", (newMessage) => {
       if (newMessage.groupId !== selectedGroup._id) return;
-      set({ groupMessages: [...get().groupMessages, newMessage] });
+
+      set((state) => ({
+        groupMessages: [...state.groupMessages, newMessage],
+      }));
     });
   },
 
   unsubscribeFromGroupMessages: () => {
+    console.log("subscribedGroup");
+
     const socket = useAuthStore.getState().socket;
     socket.off("receiveGroupMessage");
   },
@@ -120,5 +138,5 @@ export const useGroupChatStore = create((set, get) => ({
     }
   },
 
-  setSelectedGroup: (selectedGroup) => set({ selectedGroup }),
+  setSelectedGroup: (group) => set({ selectedGroup: group }),
 }));

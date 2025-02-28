@@ -98,6 +98,7 @@ export const useAuthStore = create((set, get) => ({
 // console.log("sdlkfgdslgjdfl"+authUser);
     const socket = io(BASE_URL, {
       auth : { userId: authUser?._id },
+      withCredentials:true
     });
 
     // socket.on("connect", () => console.log("✅ Socket connected:", socket.id));

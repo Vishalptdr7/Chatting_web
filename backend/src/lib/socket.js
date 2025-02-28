@@ -19,6 +19,7 @@ export function getReceiverSocketId(userId) {
   return userSocketMap.get(userId) || null;
 }
 
+
 io.on("connection", (socket) => {
   const userId = socket.handshake.auth?.userId;
 
@@ -40,10 +41,11 @@ io.on("connection", (socket) => {
     console.log(`📌 User ${userId} joined group ${groupId}`);
   });
 
-  socket.on("sendGroupMessage", ({ groupId, message }) => {
-    console.log(`📨 Group message sent in ${groupId} by ${userId}`);
-    io.to(groupId).emit("receiveGroupMessage", { sender: userId, message });
-  });
+ socket.on("sendGroupMessage", ({ groupId, message }) => {
+  console.log(`📨 Group message sent in ${groupId} by ${userId}`);
+  io.to(groupId).emit("receiveGroupMessage", { sender: userId, message, groupId }); // Add groupId
+});
+
 
   socket.on("disconnect", () => {
     console.log("❌ A user disconnected:", socket.id);

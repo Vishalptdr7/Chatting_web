@@ -6,17 +6,22 @@ import { Users, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { socket } from "../lib/socket.js";
 import { useGroupChatStore } from "../store/useGroupChat.js";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const {
+    createGroup,
     getGroup,
-    createGroup, // ✅ Correct store
+    groups,
+    setSelectedGroup,
+    selectedGroup,
+    isGroupsLoading,
   } = useGroupChatStore();
-  const { groupIds,setGroupId}=useState(null);
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } =
     useChatStore();
-
   const { onlineUsers, authUser } = useAuthStore();
+
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [selectedGroupUsers, setSelectedGroupUsers] = useState([]);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -24,19 +29,21 @@ const Sidebar = () => {
 
   useEffect(() => {
     getUsers();
-    
-  }, [getUsers]);
+    getGroup();
+  }, []);
 
   const filteredUsers = showOnlineOnly
-    ? users.filter((user) => onlineUsers.includes(user._id))
-    : users;
+    ? users.filter(
+        (user) => user._id !== authUser._id && onlineUsers.includes(user._id)
+      )
+    : users.filter((user) => user._id !== authUser._id);
 
   const handleGroupSelection = (userId) => {
-    if (selectedGroupUsers.includes(userId)) {
-      setSelectedGroupUsers(selectedGroupUsers.filter((id) => id !== userId));
-    } else {
-      setSelectedGroupUsers([...selectedGroupUsers, userId]);
-    }
+    setSelectedGroupUsers((prevUsers) =>
+      prevUsers.includes(userId)
+        ? prevUsers.filter((id) => id !== userId)
+        : [...prevUsers, userId]
+    );
   };
 
   const handleCreateGroup = async () => {
@@ -50,10 +57,10 @@ const Sidebar = () => {
     }
     try {
       const { groupId } = await createGroup({
-        members: selectedGroupUsers,
+        members: [...selectedGroupUsers, authUser._id],
         groupName,
       });
-      setGroupId(groupId);
+
       if (!groupId) {
         throw new Error("Group ID not returned");
       }
@@ -76,8 +83,12 @@ const Sidebar = () => {
     }
   };
 
+  const handleGroupClick = (group) => {
+    setSelectedGroup(group);
+    setSelectedUser(null);
+  };
 
-  if (isUsersLoading) return <SidebarSkeleton />;
+  if (isUsersLoading || isGroupsLoading) return <SidebarSkeleton />;
 
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
@@ -87,7 +98,6 @@ const Sidebar = () => {
             <Users className="size-6" />
             <span className="font-medium hidden lg:block">Contacts</span>
           </div>
-
           <button
             onClick={() => setShowCreateGroup(!showCreateGroup)}
             className="btn btn-sm btn-circle"
@@ -147,6 +157,29 @@ const Sidebar = () => {
       )}
 
       <div className="overflow-y-auto w-full py-3">
+        {groups.map((group) => (
+          <button
+            key={group._id}
+            onClick={() => handleGroupClick(group)}
+            className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${
+              selectedGroup?._id === group._id
+                ? "bg-base-300 ring-1 ring-base-300"
+                : ""
+            }`}
+          >
+            <div className="relative mx-auto lg:mx-0">
+              <div className="size-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-lg">
+                {group.groupName.charAt(0).toUpperCase()}
+              </div>
+            </div>
+
+            <div className="hidden lg:block text-left min-w-0">
+              <div className="font-medium truncate">{group.groupName}</div>
+              <div className="text-sm text-zinc-400">Group</div>
+            </div>
+          </button>
+        ))}
+
         {filteredUsers.map((user) => (
           <button
             key={user._id}
